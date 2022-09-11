@@ -1,2 +1,4 @@
 # Category-vending-machine
-for discord
+ 
+ For discord
+ 
