@@ -1,0 +1,587 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@9"></script>
+    <script src="https://cdn.jsdelivr.net/npm/promise-polyfill"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="{{ url_for('static', filename='vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+    <link href="{{ url_for('static', filename='css/simple-sidebar.css') }}" rel="stylesheet">
+    <link rel="shortcut icon" href="./DV.ico" type="image/x-icon">
+    </link>
+
+    <script>
+        function logout_button() {
+            Swal.fire({
+                title: '로그아웃',
+                /*상단 타이틀*/
+                text: '정말로 로그아웃하시겠습니까?',
+                /*내용*/
+                icon: 'success',
+                /*아이콘 타입*/
+                showCancelButton: true,
+                cancelButtonColor: '#d33',
+                confirmButtonColor: '#009900',
+                confirmButtonText: '확인',
+                /*확인버튼 클가*/
+                cancelButtonText: '취소'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = '/logout';
+                }
+            })
+        }
+
+        function cancel_button() {
+            Swal.fire({
+                title: '변경 취소',
+                /*상단 타이틀*/
+                text: '정말로 변경 내용을 삭제하시겠습니까?',
+                /*내용*/
+                icon: 'warning',
+                /*아이콘 타입*/
+                showCancelButton: true,
+                cancelButtonColor: '#d33',
+                confirmButtonColor: '#009900',
+                confirmButtonText: '확인',
+                /*확인버튼 클가*/
+                cancelButtonText: '취소'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    location.reload();
+                }
+            })
+        }
+
+        function setting() {
+            Swal.fire({
+                title: '저장하시겠습니까?',
+                text: "기존 설정은 모두 삭제됩니다!",
+                icon: 'warning',
+                showCancelButton: true,
+                cancelButtonColor: '#d33',
+                confirmButtonColor: '#009900'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: "/culsetting",
+                        type: "post",
+                        data: $("form").serialize(),
+                    }).done(function(data) {
+                        if (data == "ok") {
+                            Swal.fire({
+                                title: '저장되었습니다!',
+                                text: '입력하신 데이터가 저장되었습니다.',
+                                icon: "success"
+                            });
+                        } else {
+                            Swal.fire(
+                                '저장 실패',
+                                data,
+                                'error'
+                            );
+                        }
+                    });
+                }
+            })
+        }
+
+        function manage() {
+            Swal.fire({
+                title: '저장하시겠습니까?',
+                text: "기존 설정은 모두 삭제됩니다!",
+                icon: 'warning',
+                showCancelButton: true,
+                cancelButtonColor: '#d33',
+                confirmButtonColor: '#009900'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: "/setting",
+                        type: "post",
+                        data: $("form").serialize(),
+                    }).done(function(data) {
+                        if (data == "ok") {
+                            Swal.fire({
+                                title: '저장되었습니다!',
+                                text: '입력하신 데이터가 저장되었습니다.',
+                                icon: "success"
+                            });
+                        } else {
+                            Swal.fire(
+                                '저장 실패',
+                                data,
+                                'error'
+                            );
+                        }
+                    });
+                }
+            })
+        }
+    </script>
+
+    <title>Star Vends</title>
+
+</head>
+
+<body>
+
+    <div class="d-flex" id="wrapper">
+        <!-- class="list-group-item list-group-item-action bg-dark bg-opacity-90 text-light" -->
+        <!-- Sidebar -->
+        <div id="sidebar-wrapper" style="background-color: #181818;">
+            <div class="sidebar-heading">Star Vends</div>
+            <div class="list-group list-group-flush" id="side-pannel" style="background-color: #181818;">
+                <b><a href="/setting" class="list-group-item list-group-item-action text-light" style="background-color: #181818;">기본 설정</a></b>
+                <a href="/manageuser" class="list-group-item list-group-item-action text-light" style="background-color: #181818;">유저 관리</a>
+                <a href="/manageprod" class="list-group-item list-group-item-action text-light" style="background-color: #181818;">제품 관리</a>
+                <a href="/license" class="list-group-item list-group-item-action text-light" style="background-color: #181818;">라이센스 관리</a>
+                <b><a href=http://vendinvite.o-r.kr/" class="btn btn-primary btn-block" style="margin-left: 30px;margin-top: 15px;">자판기 공식 디스코드</a></b>
+            </div>
+        </div>
+        <!-- /#sidebar-wrapper -->
+
+        <!-- Page Content -->
+        <div id="page-content-wrapper">
+
+            <nav class="navbar navbar-expand-lg navbar-light border-bottom" style="background-color:  #181818;border: 0px;">
+                <button class="btn btn-primary" id="menu-toggle" style="margin-left: 15px;">메뉴</button>&nbsp;&nbsp;
+                <button class="btn btn-danger" onclick="logout_button()">로그아웃</button>
+            </nav>
+            <div class="container-fluid">
+                <form name="form" style="margin-bottom: 10px;margin-top: 10px;margin-left: 30px;margin-right: 30px;">
+                    <div>
+                        <div class="form-group">
+                            <div class="card" style="border: 0px;">
+                                <div class="card-header" style="background-color: #232329; color: rgb(253, 251, 241);">판매금액</div>
+                                <div class="card-body" style="background-color: #232329; color: rgb(253, 251, 241);" id="total">
+                                    <div class="container" id="total-nav">
+                                        <div class="row" id="total-row">
+                                            <div class="col-md-4" id="total1" style="margin-bottom: 10px; margin-top: 10px;">
+                                                <label for="exampleInputEmail1">금일 충전금액 : {{total[0]}}원</label>
+                                            </div>
+                                            <div class="col-md-4" id="total1" style="margin-bottom: 10px; margin-top: 10px;">
+                                                <label for="exampleInputEmail1">금주 충전금액 : {{total[1]}}원</label>
+                                            </div>
+                                            <div class="col-md-4" id="total1" style="margin-bottom: 10px; margin-top: 10px;">
+                                                <label for="exampleInputEmail1">금월 충전금액 : {{total[2]}}원</label>
+                                            </div>
+                                        </div>
+                                        <div class="row" id="total-row">
+                                            <div class="col-md-4" id="total1" style="margin-bottom: 10px;">
+                                                <label for="exampleInputEmail1">금일 계좌 충전금액 : {{total[6]}}원</label>
+                                            </div>
+                                            <div class="col-md-4" id="total1" style="margin-bottom: 10px;">
+                                                <label for="exampleInputEmail1">금주 계좌 충전금액 : {{total[7]}}원</label>
+                                            </div>
+                                            <div class="col-md-4" id="total1" style="margin-bottom: 10px;">
+                                                <label for="exampleInputEmail1">금월 계좌 충전금액 : {{total[8]}}원</label>
+                                            </div>
+                                        </div>
+                                        <div class="row" id="total-row">
+                                            <div class="col-md-4" id="total1" style="margin-bottom: 10px;">
+                                                <label for="exampleInputEmail1">금일 문화상품권 충전금액 : {{total[3]}}원</label>
+                                            </div>
+                                            <div class="col-md-4" id="total1" style="margin-bottom: 10px;">
+                                                <label for="exampleInputEmail1">금주 문화상품권 충전금액 : {{total[4]}}원</label>
+                                            </div>
+                                            <div class="col-md-4" id="total1" style="margin-bottom: 10px;">
+                                                <label for="exampleInputEmail1">금월 문화상품권 충전금액 : {{total[5]}}원</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div style="margin-bottom: 10px; margin-left: 30px;margin-right: 30px;">
+                        <div style="margin-bottom: 10px;">
+                            <div class="form-group">
+                                <div class="card" style="border: 0px;">
+                                    <div class="card-header" style="background-color: #232329; color: rgb(253, 251, 241);">
+                                        구매로그
+                                    </div>
+                                    <div class="card-body" style="background-color: #232329; color: rgb(253, 251, 241);">
+                                        <div class="container">
+                                            <div class="row">
+                                                <div class="col-md-12" style="padding-top : 10px;">
+                                                    <table class="table table-hover" id="board_table">
+                                                        <thead style="color: rgb(253, 251, 241);">
+                                                            <tr>
+                                                                <th style="color: rgb(253, 251, 241);">디스코드 이름</th>
+                                                                <th style="color: rgb(253, 251, 241);">디스코드 ID</th>
+                                                                <th style="color: rgb(253, 251, 241);">제품명</th>
+                                                                <th style="color: rgb(253, 251, 241);">제품금액</th>
+                                                                <th style="color: rgb(253, 251, 241);">구매시간</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody style="color: rgb(253, 251, 241);">
+                                                            {% for sold_info in sold_infos %}
+                                                            <tr>
+                                                                <td style="color: rgb(253, 251, 241);">{{sold_info[0]}}</td>
+                                                                <td style="color: rgb(253, 251, 241);">{{sold_info[1]}}</td>
+                                                                <td style="color: rgb(253, 251, 241);">{{sold_info[2]}}</td>
+                                                                <td style="color: rgb(253, 251, 241);">{{sold_info[3]}}</td>
+                                                                <td style="color: rgb(253, 251, 241);">{{sold_info[4]}}</td>
+                                                            </tr>
+                                                            {% endfor %}
+                                                        </tbody>
+
+                                                        <script>
+                                                            var rowPerPage = 10;
+
+                                                            $('#nav').remove();
+                                                            var $products = $('#board_table');
+
+                                                            $products.after('<div id="nav" style="text-align:center;"">');
+
+
+                                                            var $tr = $($products).find('tbody tr');
+                                                            var rowTotals = $tr.length;
+                                                            //	console.log(rowTotals);
+
+                                                            var pageTotal = Math.ceil(rowTotals / rowPerPage);
+                                                            var i = 0;
+
+                                                            for (; i < pageTotal; i++) {
+                                                                $('<button class="btn btn-secondary" style="margin-left: 15px;display: inline-block; href="#""></button>')
+                                                                    .attr('rel', i)
+                                                                    .html(i + 1)
+                                                                    .appendTo('#nav');
+                                                            }
+
+                                                            $tr.addClass('off-screen')
+                                                                .slice(0, rowPerPage)
+                                                                .removeClass('off-screen');
+
+                                                            var $pagingLink = $('#nav button');
+                                                            $pagingLink.on('click', function(evt) {
+                                                                evt.preventDefault();
+                                                                var $this = $(this);
+                                                                if ($this.hasClass('active')) {
+                                                                    return;
+                                                                }
+                                                                $pagingLink.removeClass('active');
+                                                                $this.addClass('active');
+
+                                                                // 0 => 0(0*4), 4(0*4+4)
+                                                                // 1 => 4(1*4), 8(1*4+4)
+                                                                // 2 => 8(2*4), 12(2*4+4)
+                                                                // 시작 행 = 페이지 번호 * 페이지당 행수
+                                                                // 끝 행 = 시작 행 + 페이지당 행수
+
+                                                                var currPage = $this.attr('rel');
+                                                                var startItem = currPage * rowPerPage;
+                                                                var endItem = startItem + rowPerPage;
+
+                                                                $tr.css('opacity', '0.0')
+                                                                    .addClass('off-screen')
+                                                                    .slice(startItem, endItem)
+                                                                    .removeClass('off-screen')
+                                                                    .animate({
+                                                                        opacity: 1
+                                                                    }, 300);
+
+                                                            });
+
+                                                            $pagingLink.filter(':first').addClass('active');
+
+                                                            $setRows.submit();
+                                                        </script>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 10px; margin-left: 30px;margin-right: 30px;">
+                        <div style="margin-bottom: 10px;">
+                            <div class="form-group">
+                                <div class="card" style="border: 0px;">
+                                    <div class="card-header" style="background-color: #232329; color: rgb(253, 251, 241);">
+                                        웹패널 관련
+                                    </div>
+                                    <div class="card-body" style="background-color: #232329; color: rgb(253, 251, 241);">
+                                        <div class="container">
+                                            <div class="row">
+                                                <div class="col-md-12" style="padding-top : 10px;">
+                                                    <label for="exampleInputEmail1">웹패널 PW</label>
+                                                    <input class="form-control" id="webpanelpw" placeholder="웹패널 PW" name="webpanelpw" value="{{info[4]}}" style="background-color: #232329; color: rgb(253, 251, 241); border: 1.5px solid rgb(253, 251, 241); margin-top: 10px;">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div style="margin-bottom: 10px; margin-left: 30px;margin-right: 30px;">
+                        <div class="form-group">
+                            <div class="card" style="border: 0px;">
+                                <div class="card-header" style="background-color: #232329; color: rgb(253, 251, 241);">
+                                    문화상품권 자동충전 관련
+                                </div>
+                                <div class="card-body" style="background-color: #232329; color: rgb(253, 251, 241);">
+                                    <div class="container">
+                                        <div class="row">
+                                            <div class="col-md-6" style="padding-top : 10px;">
+                                                <label for="exampleInputEmail1">컬쳐랜드 ID</label>
+                                                <input class="form-control" id="cultureid" placeholder="컬쳐랜드 ID" name="cultureid" value="{{info[2]}}" style="background-color: #232329; color: rgb(253, 251, 241); border: 1.5px solid rgb(253, 251, 241); margin-top: 10px;">
+                                            </div>
+                                            <div class="col-md-6" style="padding-top : 10px;">
+                                                <label for="exampleInputEmail1">컬쳐랜드 PW</label>
+                                                <input class="form-control" id="culturepw" placeholder="컬쳐랜드 PW" type="password" name="culturepw" value="{{info[3]}}" style="background-color: #232329; color: rgb(253, 251, 241); border: 1.5px solid rgb(253, 251, 241); margin-top: 10px;">
+                                            </div>
+                                            <div class="col-md-6" style="padding-top : 10px;">
+                                                <label for="exampleInputEmail1">충전 수수료 (1~100%)</label>
+                                                <input class="form-control" id="fee" placeholder="충전 수수료 (1~100%)" type="number" min="0" max="100" name="fee" value="{{info[8]}}" style="background-color: #232329; color: rgb(253, 251, 241); border: 1.5px solid rgb(253, 251, 241); margin-top: 10px;">
+                                            </div>
+                                            <div class="col-md-6" style="padding-top : 10px;">
+                                                <label for="exampleInputEmail1">문화상품권 충전 정지 수</label>
+                                                <input class="form-control" id="chargeban" placeholder="문화상품권 충전 정지 수 (1~10)" type="number" min="0" max="10" name="chargeban" value="{{info[15]}}" style="background-color: #232329; color: rgb(253, 251, 241); border: 1.5px solid rgb(253, 251, 241); margin-top: 10px;">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 10px; margin-left: 30px;margin-right: 30px;">
+                        <div class="form-group">
+                            <div class="card" style="border: 0px;">
+                                <div class="card-header" style="background-color: #232329; color: rgb(253, 251, 241);">
+                                    로그 관련
+                                </div>
+                                <div class="card-body" style="background-color: #232329; color: rgb(253, 251, 241);">
+                                    <div class="container">
+                                        <div class="row">
+                                            <div class="col-md-6" style="padding-top : 10px;">
+                                                <label for="exampleInputEmail1">관리자 로그 웹훅</label>
+                                                <input class="form-control" id="logwebhk" placeholder="관리자 로그 웹훅" name="logwebhk" value="{{info[6]}}" style="background-color: #232329; color: rgb(253, 251, 241); border: 1.5px solid rgb(253, 251, 241); margin-top: 10px;">
+                                            </div>
+                                            <div class="col-md-6" style="padding-top : 10px;">
+                                                <label for="exampleInputEmail1">구매 로그 웹훅</label>
+                                                <input class="form-control" id="buylogwebhk" placeholder="구매 로그 웹훅" name="buylogwebhk" value="{{info[7]}}" style="background-color: #232329; color: rgb(253, 251, 241); border: 1.5px solid rgb(253, 251, 241); margin-top: 10px;">
+                                            </div>
+                                            <div class="col-md-12" style="padding-top : 10px;">
+                                                <label for="exampleInputEmail1">웹훅 프로필</label>
+                                                <input class="form-control" id="webhookprofile" placeholder="웹훅 프로필" name="webhookprofile" value="{{info[21]}}" style="background-color: #232329; color: rgb(253, 251, 241); border: 1.5px solid rgb(253, 251, 241); margin-top: 10px;">
+                                            </div>
+                                            <div class="col-md-12" style="padding-top : 10px;">
+                                                <label for="exampleInputEmail1">웹훅 이름</label>
+                                                <input class="form-control" id="webhookname" placeholder="웹훅 이름" name="webhookname" value="{{info[22]}}" style="background-color: #232329; color: rgb(253, 251, 241); border: 1.5px solid rgb(253, 251, 241); margin-top: 10px;">
+                                            </div>
+                                            <div class="col-md-12" style="padding-top : 10px;">
+                                                <label for="exampleInputEmail1">구매로그 익명 여부 Y = 익명 / N = 노익명</label>
+                                                <input class="form-control" id="buyusernamehide" placeholder="Y = 익명 / N = 노익명" name="buyusernamehide" value="{{info[18]}}" style="background-color: #232329; color: rgb(253, 251, 241); border: 1.5px solid rgb(253, 251, 241); margin-top: 10px;">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="margin-bottom: 10px; margin-left: 30px;margin-right: 30px;">
+                        <div class="form-group">
+                            <div class="card" style="border: 0px;">
+                                <div class="card-header" style="background-color: #232329; color: rgb(253, 251, 241);">
+                                    계좌 관련
+                                </div>
+                                <div class="card-body" style="background-color: #232329; color: rgb(253, 251, 241);">
+                                    <div class="container">
+                                        <div class="row">
+                                            <div class="col-md-6" style="padding-top : 10px;">
+                                                <label for="exampleInputEmail1">은행이름</label>
+                                                <input class="form-control" id="bankname" placeholder="은행 이름(예: 국민은행)" name="bankname" value="{{bank.get('bankname','')}}" style="background-color: #232329; color: rgb(253, 251, 241); border: 1.5px solid rgb(253, 251, 241); margin-top: 10px;">
+                                            </div>
+                                            <div class="col-md-6" style="padding-top : 10px;">
+                                                <label for="exampleInputEmail1">계좌번호</label>
+                                                <input class="form-control" id="banknum" placeholder="계좌번호" name="banknum" value="{{bank.get('banknum','')}}" style="background-color: #232329; color: rgb(253, 251, 241); border: 1.5px solid rgb(253, 251, 241); margin-top: 10px;">
+                                            </div>
+                                            <div class="col-md-6" style="padding-top : 10px;">
+                                                <label for="exampleInputEmail1">예금주</label>
+                                                <input class="form-control" id="bankowner" placeholder="예금주" name="bankowner" value="{{bank.get('bankowner','')}}" style="background-color: #232329; color: rgb(253, 251, 241); border: 1.5px solid rgb(253, 251, 241); margin-top: 10px;">
+                                            </div>
+                                            <div class="col-md-6" style="padding-top : 10px;">
+                                                <label for="exampleInputEmail1">Access Tokens</label>
+                                                <input class="form-control" id="bankpw" placeholder="Access Tokens" name="bankpw" value="{{bank.get('bankpw','')}}" style="background-color: #232329; color: rgb(253, 251, 241); border: 1.5px solid rgb(253, 251, 241); margin-top: 10px;">
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 10px; margin-left: 30px;margin-right: 30px;">
+                        <div class="form-group">
+                            <div class="card" style="border: 0px;">
+                                <div class="card-header" style="background-color: #232329; color: rgb(253, 251, 241);">
+                                    역할 관련
+                                </div>
+                                <div class="card-body" style="background-color: #232329; color: rgb(253, 251, 241);">
+                                    <div class="container">
+                                        <div class="row">
+                                            <div class="col-md-12" style="padding-top : 10px;">
+                                                <label for="exampleInputEmail1">구매자 역할 ID</label>
+                                                <input class="form-control" id="roleid" placeholder="구매자 역할 ID" name="roleid" value="{{info[5]}}" style="background-color: #232329; color: rgb(253, 251, 241); border: 1.5px solid rgb(253, 251, 241); margin-top: 10px;">
+                                            </div>
+                                            <div class="col-md-12" style="padding-top : 10px;">
+                                                <label for="exampleInputEmail1">VIP 역할 ID</label>
+                                                <input class="form-control" id="viproleid" placeholder="구매자 역할 ID" name="viproleid" value="{{info[19]}}" style="background-color: #232329; color: rgb(253, 251, 241); border: 1.5px solid rgb(253, 251, 241); margin-top: 10px;">
+                                            </div>
+                                            <div class="col-md-12" style="padding-top : 10px;">
+                                                <label for="exampleInputEmail1">VVIP 역할 ID</label>
+                                                <input class="form-control" id="vviproleid" placeholder="구매자 역할 ID" name="vviproleid" value="{{info[20]}}" style="background-color: #232329; color: rgb(253, 251, 241); border: 1.5px solid rgb(253, 251, 241); margin-top: 10px;">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 10px; margin-left: 30px;margin-right: 30px;">
+                        <div class="form-group">
+                            <div class="card" style="border: 0px;">
+                                <div class="card-header" style="background-color: #232329; color: rgb(253, 251, 241);">
+                                    등급별 할인율 관련
+                                </div>
+                                <div class="card-body" style="background-color: #232329; color: rgb(253, 251, 241);">
+                                    <div class="container">
+                                        <div class="row">
+                                            <div class="col-md-6" style="padding-top : 10px;">
+                                                <label for="exampleInputEmail1">일반 등급 할인율 (0~100%)</label>
+                                                <input class="form-control" id="normaloff" placeholder="일반 등급 할인율" type="number" min="0" max="100" name="normaloff" value="{{info[10]}}" style="background-color: #232329; color: rgb(253, 251, 241); border: 1.5px solid rgb(253, 251, 241); margin-top: 10px;">
+                                            </div>
+                                            <div class="col-md-6" style="padding-top : 10px;">
+                                                <label for="exampleInputEmail1">VIP 등급 할인율 (0~100%)</label>
+                                                <input class="form-control" id="vipoff" placeholder="VIP 등급 할인율" type="number" min="0" max="100" name="vipoff" value="{{info[11]}}" style="background-color: #232329; color: rgb(253, 251, 241); border: 1.5px solid rgb(253, 251, 241); margin-top: 10px;">
+                                            </div>
+                                            <div class="col-md-6" style="padding-top : 10px;">
+                                                <label for="exampleInputEmail1">VVIP 등급 할인율 (0~100%)</label>
+                                                <input class="form-control" id="vvipoff" placeholder="VVIP 등급 할인율" type="number" min="0" max="100" name="vvipoff" value="{{info[12]}}" style="background-color: #232329; color: rgb(253, 251, 241); border: 1.5px solid rgb(253, 251, 241); margin-top: 10px;">
+                                            </div>
+                                            <div class="col-md-6" style="padding-top : 10px;">
+                                                <label for="exampleInputEmail1">리셀러 등급 할인율 (0~100%)</label>
+                                                <input class="form-control" id="reselloff" placeholder="리셀러 등급 할인율" type="number" min="0" max="100" name="reselloff" value="{{info[13]}}" style="background-color: #232329; color: rgb(253, 251, 241); border: 1.5px solid rgb(253, 251, 241); margin-top: 10px;">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 10px; margin-left: 30px;margin-right: 30px;">
+                        <div class="form-group">
+                            <div class="card" style="border: 0px;">
+                                <div class="card-header" style="background-color: #232329; color: rgb(253, 251, 241);">
+                                    자동 등급 설정 관련
+                                </div>
+                                <div class="card-body" style="background-color: #232329; color: rgb(253, 251, 241);">
+                                    <div class="container">
+                                        <div class="row">
+                                            <div class="col-md-6" style="padding-top : 10px;">
+                                                <label for="exampleInputEmail1">VIP 등급 자동 등업 누적 금액</label>
+                                                <input class="form-control" id="vipautosetting" placeholder="VIP 등급 자동 등업 누적 금액" type="number" min="0" name="vipautosetting" value="{{info[16]}}" style="background-color: #232329; color: rgb(253, 251, 241); border: 1.5px solid rgb(253, 251, 241); margin-top: 10px;">
+                                            </div>
+                                            <div class="col-md-6" style="padding-top : 10px;">
+                                                <label for="exampleInputEmail1">VVIP 등급 자동 등업 누적 금액</label>
+                                                <input class="form-control" id="vvipautosetting" placeholder="VVIP 등급 자동 등업 누적 금액" type="number" min="0" name="vvipautosetting" value="{{info[17]}}" style="background-color: #232329; color: rgb(253, 251, 241); border: 1.5px solid rgb(253, 251, 241); margin-top: 10px;">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 10px; margin-left: 30px;margin-right: 30px;">
+                        <div class="form-group">
+                            <div class="card" style="border: 0px;">
+                                <div class="card-header" style="background-color: #232329; color: rgb(253, 251, 241);">
+                                    버튼, 임베드 관련
+                                </div>
+                                <div class="card-body" style="background-color: #232329; color: rgb(253, 251, 241);">
+                                    <div class="container">
+                                        <div class="row">
+                                            <div class="col-md-12" style="padding-top : 10px;">
+                                                <label for="exampleInputEmail1">버튼, 임베드 색깔 (파랑, 빨강, 초록, 검정, 회색)</label>
+                                                <input class="form-control" id="color" placeholder="버튼, 임베드 색깔" name="color" value="{{info[14]}}" style="background-color: #232329; color: rgb(253, 251, 241); border: 1.5px solid rgb(253, 251, 241); margin-top: 10px;">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 10px; margin-left: 30px;margin-right: 30px;">
+                        <div style="margin-bottom: 10px;">
+                            <div class="form-group">
+                                <div class="card" style="border: 0px;">
+                                    <div class="card-header" style="background-color: #232329; color: rgb(253, 251, 241);">
+                                        공지 관리
+                                    </div>
+                                    <div class="card-body" style="background-color: #232329; color: rgb(253, 251, 241);">
+                                        <div class="container">
+                                            <div class="row">
+                                                <div class="col-md-12" style="padding-top : 10px;">
+                                                    <textarea class="form-control" rows="10" id="notice" placeholder="공지사항" name="notice"
+                                                        style="background-color: #232329; color: rgb(253, 251, 241); border: 1.5px solid rgb(253, 251, 241); margin-top: 10px; resize: none;">{{info[23]}}</textarea>
+                                                    <input type="hidden" id="name" name="name" value="{{info[23]}}">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+                <div style="float: right;">
+                    <button class="btn btn-primary" style="margin-right: 15px;"onclick="setting();">계정저장</button>
+                    <button class="btn btn-primary" onclick="manage();">적용하기</button>&nbsp;&nbsp;
+                    <button class="btn btn-danger" onclick="cancel_button();">취소하기</button><br><br>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+    <!-- /#page-content-wrapper -->
+
+    </div>
+    <!-- /#wrapper -->
+
+    <!-- Bootstrap core JavaScript -->
+
+    <!-- Menu Toggle Script -->
+    <script>
+        $("#menu-toggle").click(function(e) {
+            e.preventDefault();
+            $("#wrapper").toggleClass("toggled");
+        });
+    </script>
+
+</body>
+
+</html>
